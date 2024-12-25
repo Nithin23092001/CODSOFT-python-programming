@@ -1,0 +1,166 @@
+//a.py
+
+#Command-Line To-Do List Application
+
+import json
+import os
+
+# File to store tasks
+TASKS_FILE = "tasks.json"
+
+# Load tasks from file
+def load_tasks():
+    if os.path.exists(TASKS_FILE):
+        with open(TASKS_FILE, "r") as file:
+            return json.load(file)
+    return []
+
+# Save tasks to file
+def save_tasks(tasks):
+    with open(TASKS_FILE, "w") as file:
+        json.dump(tasks, file, indent=4)
+
+def add_task(tasks):
+    task = input("Enter the task: ")
+    tasks.append({"task": task, "completed": False})
+    print(f"Task '{task}' added!")
+
+def view_tasks(tasks):
+    if not tasks:
+        print("No tasks available!")
+    else:
+        print("\nTo-Do List:")
+        for i, task in enumerate(tasks, start=1):
+            status = "✔" if task["completed"] else "✘"
+            print(f"{i}. {task['task']} [{status}]")
+
+def complete_task(tasks):
+    view_tasks(tasks)
+    try:
+        task_no = int(input("\nEnter the task number to mark as complete: "))
+        if 1 <= task_no <= len(tasks):
+            tasks[task_no - 1]["completed"] = True
+            print("Task marked as complete!")
+        else:
+            print("Invalid task number!")
+    except ValueError:
+        print("Please enter a valid number!")
+
+def delete_task(tasks):
+    view_tasks(tasks)
+    try:
+        task_no = int(input("\nEnter the task number to delete: "))
+        if 1 <= task_no <= len(tasks):
+            removed_task = tasks.pop(task_no - 1)
+            print(f"Task '{removed_task['task']}' deleted!")
+        else:
+            print("Invalid task number!")
+    except ValueError:
+        print("Please enter a valid number!")
+
+def main():
+    tasks = load_tasks()
+    while True:
+        print("\nTo-Do List Menu:")
+        print("1. Add Task")
+        print("2. View Tasks")
+        print("3. Mark Task as Complete")
+        print("4. Delete Task")
+        print("5. Exit")
+        
+        choice = input("Enter your choice: ")
+        if choice == "1":
+            add_task(tasks)
+        elif choice == "2":
+            view_tasks(tasks)
+        elif choice == "3":
+            complete_task(tasks)
+        elif choice == "4":
+            delete_task(tasks)
+        elif choice == "5":
+            save_tasks(tasks)
+            print("Tasks saved. Goodbye!")
+            break
+        else:
+            print("Invalid choice! Please select a valid option.")
+
+if __name__ == "__main__":
+    main()
+
+
+//b.py
+
+##GUI-Based To-Do List Application
+
+import tkinter as tk
+from tkinter import messagebox
+
+class ToDoApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("To-Do List")
+        
+        self.tasks = []
+        
+        # Input frame
+        self.input_frame = tk.Frame(self.root)
+        self.input_frame.pack(pady=10)
+        
+        self.task_entry = tk.Entry(self.input_frame, width=40)
+        self.task_entry.pack(side=tk.LEFT, padx=10)
+        
+        self.add_button = tk.Button(self.input_frame, text="Add Task", command=self.add_task)
+        self.add_button.pack(side=tk.LEFT)
+        
+        # Task list
+        self.tasks_frame = tk.Frame(self.root)
+        self.tasks_frame.pack(pady=10)
+        
+        self.task_listbox = tk.Listbox(self.tasks_frame, width=50, height=10, selectmode=tk.MULTIPLE)
+        self.task_listbox.pack(side=tk.LEFT, padx=10)
+        
+        self.scrollbar = tk.Scrollbar(self.tasks_frame, orient=tk.VERTICAL, command=self.task_listbox.yview)
+        self.scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.task_listbox.config(yscrollcommand=self.scrollbar.set)
+        
+        # Buttons
+        self.buttons_frame = tk.Frame(self.root)
+        self.buttons_frame.pack(pady=10)
+        
+        self.complete_button = tk.Button(self.buttons_frame, text="Mark as Complete", command=self.mark_complete)
+        self.complete_button.pack(side=tk.LEFT, padx=10)
+        
+        self.delete_button = tk.Button(self.buttons_frame, text="Delete Task", command=self.delete_task)
+        self.delete_button.pack(side=tk.LEFT, padx=10)
+    
+    def add_task(self):
+        task = self.task_entry.get()
+        if task:
+            self.tasks.append({"task": task, "completed": False})
+            self.task_entry.delete(0, tk.END)
+            self.refresh_listbox()
+        else:
+            messagebox.showwarning("Input Error", "Task cannot be empty!")
+    
+    def refresh_listbox(self):
+        self.task_listbox.delete(0, tk.END)
+        for task in self.tasks:
+            status = "✔" if task["completed"] else "✘"
+            self.task_listbox.insert(tk.END, f"{task['task']} [{status}]")
+    
+    def mark_complete(self):
+        selected_indices = self.task_listbox.curselection()
+        for index in selected_indices:
+            self.tasks[index]["completed"] = True
+        self.refresh_listbox()
+    
+    def delete_task(self):
+        selected_indices = self.task_listbox.curselection()
+        for index in reversed(selected_indices):
+            self.tasks.pop(index)
+        self.refresh_listbox()
+
+if __name__ == "__main__":
+    root = tk.Tk()
+    app = ToDoApp(root)
+    root.mainloop()
