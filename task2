@@ -1,0 +1,65 @@
+import random
+import string
+
+def generate_password(length, include_uppercase, include_lowercase, include_digits, include_special):
+    characters = ""
+    if include_uppercase:
+        characters += string.ascii_uppercase
+    if include_lowercase:
+        characters += string.ascii_lowercase
+    if include_digits:
+        characters += string.digits
+    if include_special:
+        characters += string.punctuation
+
+    if not characters:
+        return "Error: At least one character type must be included to generate a password."
+    
+    if length < 4:
+        return "Password length must be at least 4 for adequate complexity."
+    
+    password = random.choices(characters, k=length)
+    return ''.join(password)
+
+def get_user_preferences():
+    print("\nPassword Generator Settings")
+    try:
+        length = int(input("Enter the desired password length (minimum 4): "))
+        if length < 4:
+            print("Password length must be at least 4. Please try again.")
+            return None
+
+        print("\nChoose the types of characters to include in your password:")
+        include_uppercase = input("Include uppercase letters? (y/n): ").strip().lower() == 'y'
+        include_lowercase = input("Include lowercase letters? (y/n): ").strip().lower() == 'y'
+        include_digits = input("Include digits? (y/n): ").strip().lower() == 'y'
+        include_special = input("Include special characters? (y/n): ").strip().lower() == 'y'
+
+        if not any([include_uppercase, include_lowercase, include_digits, include_special]):
+            print("Error: You must include at least one type of character for the password.")
+            return None
+
+        return length, include_uppercase, include_lowercase, include_digits, include_special
+
+    except ValueError:
+        print("Invalid input. Please enter numbers where required.")
+        return None
+
+def main():
+    print("Welcome to the Password Generator!")
+    while True:
+        preferences = get_user_preferences()
+        if preferences is None:
+            continue
+        
+        length, include_uppercase, include_lowercase, include_digits, include_special = preferences
+        password = generate_password(length, include_uppercase, include_lowercase, include_digits, include_special)
+        print(f"\nGenerated Password: {password}")
+        
+        another = input("\nGenerate another password? (y/n): ").strip().lower()
+        if another != 'y':
+            print("Thank you for using the Password Generator. Goodbye!")
+            break
+
+if __name__ == "__main__":
+    main()
